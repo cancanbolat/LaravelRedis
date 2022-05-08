@@ -1,0 +1,47 @@
+cahche türleri;
+file, database, redis, memcached
+
+hangisini kullanırsan kullan hep aynı mantık.
+sadece env'den kurulum ayarlarını yaoman gerekiyor.
+
+genelde env'de driver alanını değiştirerek kurulum yapılıyor.
+
+database cache için db'de tablo oluşturmalısın. => php artisan cache:table
+
+memcached için "composer require ext-memcached" veya "composer require clickalicious/memcached.php"
+
+en performanslı olanlar redis ve memcached. aralarında bazı farklar var.
+redis'de bazı özelleştirmeler yapılabiliyor. detaylarına bakarsın.
+
+Cache::forever('key') => cache sonsuza kadar durur
+Cache::forget('key') => belirtilen cache'i siler
+Cache::flush() => tüm cache'leri siler
+Cache::pull('key') => ilgili key'i al ve sil yapar
+
+Cache kullanımını anlık olarak değiştirme istenebilir. Bu durumda gidip de env'den
+değiştirmeye gerek yok. Hangi cache türü kullanılacaksa onu db'ye kaydedip ordan da çekebilirsin.
+=> $cacheType = db'den çektik
+=> $cache = Cache::store($cacheType);
+=> $cache->get('key')
+=> $cache->put('key')
+===================== bu şekilde dinamik olarak da kullanabilirsin.
+
+database cache kullanırken cache adını değiştirmek istiyorsan
+config/cache.php'de 'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
+burda da belirtildiği gibi env'ye CACHE_PREFIX alanı oluşturup değiştirebilirsin.
+
+prefix'i de dinamik olarak belirleyebilirsin. 
+
+#REDİS PHP
+"composer require predis/predis" => env'de REDIS_CLIENT=predis veya 
+     => cache/database.php'de 'client' => env('REDIS_CLIENT', 'predis'), (phpredis -> predis)
+env'den driver'i redis yaptık. controller kullanımları yine aynı.
+redis'i datbase olarak kullanmak için cache/database.php'de redis alanında ilgili ayarlar var.
+redis için cache'ler 1 numaralı db'de tutuluyor.
+database için de 0'da.
+
+#REDİS DB
+CACHE_PREFIX gibi REDIS_PREFIX belirleyebilirsin.
+use Illuminate\Support\Facades\Redis;
+
+Redis::keys('*') => tüm keyleri alır.
